@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fast-vton-test"
+version = "0.1.0"
+description = "Test harness for Fast_VTON_full.pt (virtual try-on inference + Gradio demo)"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+dependencies = [
+    { name = "swiftedit", path = "../Fast-VTON", editable = true },
+    "accelerate",
+    "diffusers==0.22.0",
+    "einops",
+    "ftfy",
+    "gradio>=4.0",
+    "huggingface-hub==0.25.2",
+    "Jinja2",
+    "numpy>=1.26,<2",
+    "opencv-python-headless",
+    "pillow",
+    "safetensors",
+    "tensorboard",
+    "torch==2.2.1",
+    "torchaudio==2.2.1",
+    "torchvision==0.17.1",
+    "transformers==4.37.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+fast-vton-app = "fast_vton_test.app:main"
+fast-vton-test = "fast_vton_test.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["fast_vton_test*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: requires GPU and Fast_VTON_full.pt",
+]
