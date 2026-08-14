@@ -20,7 +20,7 @@ dependencies = [
     "diffusers==0.22.0",
     "einops",
     "ftfy",
-    "gradio>=4.0",
+    "gradio>=4.40,<5",
     "huggingface-hub==0.25.2",
     "Jinja2",
     "numpy>=1.26,<2",
