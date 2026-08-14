@@ -1,0 +1,9 @@
+model_dir: models
+bundle_name: Fast_VTON_full.pt
+scheduler_repo: Manojb/stable-diffusion-2-1-base
+dinov2_repo: facebook/dinov2-large
+segformer_repo: mattmdjaga/segformer_b2_clothes
+seg_clothing_ids: [4, 5, 6, 7]
+mask_diff_threshold: 12
+mask_morph_kernel: 9
+device: cuda

@@ -1,16 +1,23 @@
+"""Gradio demo for one-step virtual try-on."""
+
+from __future__ import annotations
+
 import gradio as gr
-from PIL import Image
 
-from fast_vton_test.inference import DEFAULT_BUNDLE, FastVTONInference
+from fast_vton.config import Config, config_from_bundle
+from fast_vton.pipeline import FastVTONPipeline
+from fast_vton.postprocessing import tensor_to_pil
 
-_PREDICTORS = {}
+_PREDICTORS: dict[str, FastVTONPipeline] = {}
 
 
-def get_predictor(bundle_path):
-    path = bundle_path or DEFAULT_BUNDLE
-    if path not in _PREDICTORS:
-        _PREDICTORS[path] = FastVTONInference(path, device="cuda")
-    return _PREDICTORS[path]
+def get_predictor(bundle_path: str | None) -> FastVTONPipeline:
+    """Return a cached :class:`FastVTONPipeline` for ``bundle_path`` (lazily built)."""
+    key = str(bundle_path) if bundle_path else str(Config().bundle_path)
+    if key not in _PREDICTORS:
+        config = config_from_bundle(bundle_path) if bundle_path else Config()
+        _PREDICTORS[key] = FastVTONPipeline(config)
+    return _PREDICTORS[key]
 
 
 def run(person, garment, agnostic, bundle_path, auto_agnostic):
@@ -25,18 +32,14 @@ def run(person, garment, agnostic, bundle_path, auto_agnostic):
         agnostic_image = predictor.build_agnostic(person)
 
     result = predictor.try_on(person, agnostic_image, garment)
-    result_image = result[0].permute(1, 2, 0).cpu().numpy()
-    result_image = (result_image * 255).astype("uint8")
-
-    return Image.fromarray(result_image), agnostic_image
+    return tensor_to_pil(result), agnostic_image
 
 
 def build_demo():
+    default_bundle = str(Config().bundle_path)
     with gr.Blocks(title="Fast-VTON Try-On") as demo:
         gr.Markdown("# Fast-VTON — Virtual Try-On (Fast_VTON_full.pt)")
-        bundle_box = gr.Textbox(
-            label="Đường dẫn bundle (Fast_VTON_full.pt)", value=DEFAULT_BUNDLE
-        )
+        bundle_box = gr.Textbox(label="Đường dẫn bundle (Fast_VTON_full.pt)", value=default_bundle)
         with gr.Row():
             person_in = gr.Image(label="Ảnh người mẫu", type="pil")
             garment_in = gr.Image(label="Ảnh quần áo", type="pil")
